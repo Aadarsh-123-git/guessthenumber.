@@ -22,7 +22,7 @@ body {
     background: radial-gradient(circle at 20% 30%, #00f5ff55, transparent 40%),
                 radial-gradient(circle at 80% 70%, #8a2be255, transparent 40%),
                 radial-gradient(circle at 50% 50%, #ff00ff44, transparent 50%);
-    animation: moveAurora 15s infinite alternate ease-in-out;
+    animation: moveAurora 18s infinite alternate ease-in-out;
     z-index: -1;
 }
 
@@ -87,32 +87,17 @@ button:hover {
     box-shadow: 0 0 20px #00f5ff;
 }
 
-/* ================= RESULT ANIMATION ================= */
+/* ================= RESULT ================= */
 #result {
     margin-top: 20px;
     font-size: 18px;
     font-weight: bold;
     min-height: 30px;
-    transition: 0.3s;
 }
 
-.win {
-    color: #00ff9f;
-    animation: pop 0.5s ease;
-}
-
-.low {
-    color: #ffcc00;
-}
-
-.high {
-    color: #ff4d6d;
-}
-
-@keyframes pop {
-    0% { transform: scale(0.7); }
-    100% { transform: scale(1); }
-}
+.win { color: #00ff9f; }
+.low { color: #ffcc00; }
+.high { color: #ff4d6d; }
 
 .attempts {
     margin-top: 15px;
@@ -143,51 +128,56 @@ button:hover {
 </div>
 
 <script>
+let secretNumber;
 let totalAttempts = 0;
+let gameActive = false;
 
 /* ================= START GAME ================= */
-async function startGame() {
-    const res = await fetch('/start', {method:'POST'});
-    const data = await res.json();
+function startGame() {
+    secretNumber = Math.floor(Math.random() * 200) + 1;
+    totalAttempts = 0;
+    gameActive = true;
 
-    document.getElementById("message").innerText = data.message;
+    document.getElementById("message").innerText = 
+        "Game Started! Guess a number between 1 and 200 🎯";
     document.getElementById("result").innerText = "";
     document.getElementById("attempts").innerText = "";
-    totalAttempts = 0;
+    document.getElementById("guessInput").value = "";
 }
 
 /* ================= SEND GUESS ================= */
-async function sendGuess() {
-    let guess = document.getElementById("guessInput").value;
-
-    if(!guess){
-        alert("Enter a number!");
+function sendGuess() {
+    if (!gameActive) {
+        alert("Click Start Game first!");
         return;
     }
 
-    const res = await fetch('/guess', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({guess:guess})
-    });
+    let guess = parseInt(document.getElementById("guessInput").value);
 
-    const data = await res.json();
+    if (!guess) {
+        alert("Enter a valid number!");
+        return;
+    }
+
     totalAttempts++;
-
     const resultDiv = document.getElementById("result");
     resultDiv.className = "";
 
-    if(data.message.includes("Correct")) {
-        resultDiv.classList.add("win");
-    }
-    else if(data.message.includes("Low")) {
+    if (guess < secretNumber) {
+        resultDiv.innerText = "Too Low 🔻";
         resultDiv.classList.add("low");
-    }
-    else {
+    } 
+    else if (guess > secretNumber) {
+        resultDiv.innerText = "Too High 🔺";
         resultDiv.classList.add("high");
+    } 
+    else {
+        resultDiv.innerText = 
+            "Correct! 🎉 You guessed it in " + totalAttempts + " attempts!";
+        resultDiv.classList.add("win");
+        gameActive = false;
     }
 
-    resultDiv.innerText = data.message;
     document.getElementById("attempts").innerText = 
         "Attempts: " + totalAttempts;
 
