@@ -6,15 +6,15 @@
 <title>🎮 Guess The Number</title>
 
 <style>
-/* ================= AURORA BACKGROUND ================= */
 body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
-    overflow: hidden;
     background: #0f0c29;
+    overflow: hidden;
     color: white;
 }
 
+/* ===== Aurora Background ===== */
 .aurora {
     position: fixed;
     width: 200%;
@@ -31,7 +31,7 @@ body {
     100% { transform: translate(-20%, -20%) rotate(360deg); }
 }
 
-/* ================= GAME CARD ================= */
+/* ===== Card ===== */
 .container {
     width: 420px;
     margin: 100px auto;
@@ -41,24 +41,12 @@ body {
     background: rgba(255,255,255,0.1);
     box-shadow: 0 20px 60px rgba(0,0,0,0.6);
     text-align: center;
-    transition: 0.3s;
-}
-
-.container:hover {
-    transform: translateY(-5px);
 }
 
 h1 {
     margin-bottom: 10px;
-    font-size: 28px;
 }
 
-#message {
-    margin-bottom: 20px;
-    opacity: 0.8;
-}
-
-/* ================= INPUT + BUTTON ================= */
 input {
     padding: 12px;
     width: 70%;
@@ -75,11 +63,10 @@ button {
     border: none;
     cursor: pointer;
     font-weight: bold;
-    font-size: 15px;
     margin: 5px;
-    transition: 0.3s;
     background: linear-gradient(45deg, #00f5ff, #8a2be2);
     color: white;
+    transition: 0.3s;
 }
 
 button:hover {
@@ -87,7 +74,6 @@ button:hover {
     box-shadow: 0 0 20px #00f5ff;
 }
 
-/* ================= RESULT ================= */
 #result {
     margin-top: 20px;
     font-size: 18px;
@@ -100,9 +86,8 @@ button:hover {
 .high { color: #ff4d6d; }
 
 .attempts {
-    margin-top: 15px;
-    opacity: 0.7;
-    font-size: 14px;
+    margin-top: 10px;
+    opacity: 0.8;
 }
 </style>
 </head>
@@ -115,12 +100,12 @@ button:hover {
     <h1>🎮 Guess The Number</h1>
     <p id="message">Click Start to Play</p>
 
-    <button onclick="startGame()">🚀 Start Game</button>
+    <button type="button" onclick="startGame()">🚀 Start Game</button>
 
     <div>
-        <input type="number" id="guessInput" placeholder="Enter your guess" min="1" max="200">
+        <input type="number" id="guessInput" placeholder="Enter your guess (1-200)">
         <br>
-        <button onclick="sendGuess()">🎯 Submit Guess</button>
+        <button type="button" onclick="checkGuess()">🎯 Submit Guess</button>
     </div>
 
     <div id="result"></div>
@@ -128,61 +113,78 @@ button:hover {
 </div>
 
 <script>
-let secretNumber;
-let totalAttempts = 0;
+let secretNumber = 0;
+let attempts = 0;
 let gameActive = false;
 
-/* ================= START GAME ================= */
+/* ===== Start Game ===== */
 function startGame() {
     secretNumber = Math.floor(Math.random() * 200) + 1;
-    totalAttempts = 0;
+    attempts = 0;
     gameActive = true;
 
-    document.getElementById("message").innerText = 
+    document.getElementById("message").innerText =
         "Game Started! Guess a number between 1 and 200 🎯";
     document.getElementById("result").innerText = "";
     document.getElementById("attempts").innerText = "";
     document.getElementById("guessInput").value = "";
 }
 
-/* ================= SEND GUESS ================= */
-function sendGuess() {
+/* ===== Check Guess ===== */
+function checkGuess() {
+
     if (!gameActive) {
         alert("Click Start Game first!");
         return;
     }
 
-    let guess = parseInt(document.getElementById("guessInput").value);
+    let input = document.getElementById("guessInput").value;
 
-    if (!guess) {
-        alert("Enter a valid number!");
+    if (input === "") {
+        alert("Please enter a number!");
         return;
     }
 
-    totalAttempts++;
+    let guess = parseInt(input);
+
+    if (isNaN(guess) || guess < 1 || guess > 200) {
+        alert("Enter a valid number between 1 and 200!");
+        return;
+    }
+
+    attempts++;
+
     const resultDiv = document.getElementById("result");
     resultDiv.className = "";
 
     if (guess < secretNumber) {
         resultDiv.innerText = "Too Low 🔻";
         resultDiv.classList.add("low");
-    } 
+    }
     else if (guess > secretNumber) {
         resultDiv.innerText = "Too High 🔺";
         resultDiv.classList.add("high");
-    } 
+    }
     else {
-        resultDiv.innerText = 
-            "Correct! 🎉 You guessed it in " + totalAttempts + " attempts!";
+        resultDiv.innerText =
+            "🎉 Correct! You guessed it in " + attempts + " attempts!";
         resultDiv.classList.add("win");
         gameActive = false;
     }
 
-    document.getElementById("attempts").innerText = 
-        "Attempts: " + totalAttempts;
+    document.getElementById("attempts").innerText =
+        "Attempts: " + attempts;
 
     document.getElementById("guessInput").value = "";
 }
+
+/* ===== Press Enter to Submit ===== */
+document.getElementById("guessInput")
+.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        checkGuess();
+    }
+});
 </script>
 
 </body>
