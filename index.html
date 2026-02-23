@@ -1,36 +1,199 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Guess The Number</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Guess The Number</title>
+
+<style>
+/* ================= AURORA BACKGROUND ================= */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden;
+    background: #0f0c29;
+    color: white;
+}
+
+.aurora {
+    position: fixed;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 20% 30%, #00f5ff55, transparent 40%),
+                radial-gradient(circle at 80% 70%, #8a2be255, transparent 40%),
+                radial-gradient(circle at 50% 50%, #ff00ff44, transparent 50%);
+    animation: moveAurora 15s infinite alternate ease-in-out;
+    z-index: -1;
+}
+
+@keyframes moveAurora {
+    0% { transform: translate(-10%, -10%) rotate(0deg); }
+    100% { transform: translate(-20%, -20%) rotate(360deg); }
+}
+
+/* ================= GAME CARD ================= */
+.container {
+    width: 420px;
+    margin: 100px auto;
+    padding: 40px;
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    text-align: center;
+    transition: 0.3s;
+}
+
+.container:hover {
+    transform: translateY(-5px);
+}
+
+h1 {
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+#message {
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+/* ================= INPUT + BUTTON ================= */
+input {
+    padding: 12px;
+    width: 70%;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+button {
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
+    margin: 5px;
+    transition: 0.3s;
+    background: linear-gradient(45deg, #00f5ff, #8a2be2);
+    color: white;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #00f5ff;
+}
+
+/* ================= RESULT ANIMATION ================= */
+#result {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    min-height: 30px;
+    transition: 0.3s;
+}
+
+.win {
+    color: #00ff9f;
+    animation: pop 0.5s ease;
+}
+
+.low {
+    color: #ffcc00;
+}
+
+.high {
+    color: #ff4d6d;
+}
+
+@keyframes pop {
+    0% { transform: scale(0.7); }
+    100% { transform: scale(1); }
+}
+
+.attempts {
+    margin-top: 15px;
+    opacity: 0.7;
+    font-size: 14px;
+}
+</style>
 </head>
+
 <body>
+
+<div class="aurora"></div>
+
 <div class="container">
     <h1>🎮 Guess The Number</h1>
     <p id="message">Click Start to Play</p>
-    <button onclick="startGame()">Start Game</button><br><br>
-    <input type="number" id="guessInput" placeholder="Enter guess">
-    <button onclick="sendGuess()">Submit</button>
-    <h3 id="result"></h3>
+
+    <button onclick="startGame()">🚀 Start Game</button>
+
+    <div>
+        <input type="number" id="guessInput" placeholder="Enter your guess" min="1" max="200">
+        <br>
+        <button onclick="sendGuess()">🎯 Submit Guess</button>
+    </div>
+
+    <div id="result"></div>
+    <div class="attempts" id="attempts"></div>
 </div>
 
 <script>
+let totalAttempts = 0;
+
+/* ================= START GAME ================= */
 async function startGame() {
     const res = await fetch('/start', {method:'POST'});
     const data = await res.json();
+
     document.getElementById("message").innerText = data.message;
+    document.getElementById("result").innerText = "";
+    document.getElementById("attempts").innerText = "";
+    totalAttempts = 0;
 }
 
+/* ================= SEND GUESS ================= */
 async function sendGuess() {
     let guess = document.getElementById("guessInput").value;
+
+    if(!guess){
+        alert("Enter a number!");
+        return;
+    }
+
     const res = await fetch('/guess', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({guess:guess})
     });
+
     const data = await res.json();
-    document.getElementById("result").innerText = data.message;
+    totalAttempts++;
+
+    const resultDiv = document.getElementById("result");
+    resultDiv.className = "";
+
+    if(data.message.includes("Correct")) {
+        resultDiv.classList.add("win");
+    }
+    else if(data.message.includes("Low")) {
+        resultDiv.classList.add("low");
+    }
+    else {
+        resultDiv.classList.add("high");
+    }
+
+    resultDiv.innerText = data.message;
+    document.getElementById("attempts").innerText = 
+        "Attempts: " + totalAttempts;
+
+    document.getElementById("guessInput").value = "";
 }
 </script>
+
 </body>
 </html>
