@@ -47,14 +47,16 @@ This project demonstrates full frontend–backend integration, dynamic API commu
 
 ## 🎮 How It Works
 
-1. Click **Start Game**  
-2. The server generates a random number  
-3. Enter your guess  
-4. The system responds with:
+1. Download the index.html file
+2. open the file
+3. Click **Start Game**  
+4. The server generates a random number  
+5. Enter your guess  
+6. The system responds with:
    - Too High 🔺  
    - Too Low 🔻  
    - Correct 🎉  
-5. The game updates instantly without refreshing  
+7. The game updates instantly without refreshing  
 
 ---
 
